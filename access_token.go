@@ -33,23 +33,24 @@ func (t *Token) SetExpires(second int64) *Token {
 	return t
 }
 
-func (t *Token) Gen(secret string) string {
+func (t *Token) Gen(secret string) (string, error) {
 	token, err := des_ecb_pkcs5_encode(t.Json(), secret)
 	if err != nil {
-		token = "gen-token-error"
+		return "gen-token-error", err
 	}
-	return token
+	return token, err
 }
 
 // 生成 Token
-func Gen(secret string, t *Token) (tokenVal string) {
+func Gen(secret string, t *Token) (tokenVal string, err error) {
 	defer func() {
 		if e := recover(); e != nil {
 			tokenVal = "gen-token-error"
+			err = e.(error)
 			log.Error(e)
 		}
 	}()
-	tokenVal = t.Gen(secret)
+	tokenVal, err = t.Gen(secret)
 	return
 }
 
@@ -58,9 +59,14 @@ func Ver(secret, tokenVal string) (t *Token, err error) {
 	defer func() {
 		if e := recover(); e != nil {
 			log.Error("解析TOKEN出错", e)
-			err = INVALID_TOKEN
+			err = e.(error)
 		}
 	}()
+	if tokenVal == "" {
+		err = INVALID_TOKEN
+		return
+	}
+
 	src, err := des_ecb_pkcs5_decode(tokenVal, secret)
 	if err != nil {
 		return
