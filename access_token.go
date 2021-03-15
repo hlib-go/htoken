@@ -6,7 +6,6 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
-	log "github.com/sirupsen/logrus"
 	"time"
 )
 
@@ -47,7 +46,6 @@ func Gen(secret string, t *Token) (tokenVal string, err error) {
 		if e := recover(); e != nil {
 			tokenVal = "gen-token-error"
 			err = e.(error)
-			log.Error(e)
 		}
 	}()
 	tokenVal, err = t.Gen(secret)
@@ -58,7 +56,6 @@ func Gen(secret string, t *Token) (tokenVal string, err error) {
 func Ver(secret, tokenVal string) (t *Token, err error) {
 	defer func() {
 		if e := recover(); e != nil {
-			log.Error("解析TOKEN出错", e)
 			err = e.(error)
 		}
 	}()
