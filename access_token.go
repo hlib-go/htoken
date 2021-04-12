@@ -57,6 +57,7 @@ func Ver(secret, tokenVal string) (t *Token, err error) {
 	defer func() {
 		if e := recover(); e != nil {
 			err = e.(error)
+			err = errors.New(INVALID_TOKEN.Error() + " " + err.Error())
 		}
 	}()
 	if tokenVal == "" {
@@ -66,6 +67,7 @@ func Ver(secret, tokenVal string) (t *Token, err error) {
 
 	src, err := des_ecb_pkcs5_decode(tokenVal, secret)
 	if err != nil {
+		err = errors.New(INVALID_TOKEN.Error() + " " + err.Error())
 		return
 	}
 	err = json.Unmarshal([]byte(src), &t)
